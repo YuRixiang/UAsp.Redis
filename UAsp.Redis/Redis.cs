@@ -12,6 +12,7 @@ namespace UAsp.Redis
 
         public SocketManager socketManger;
         public SocketManager.SocktInfo currentSocket = new SocketManager.SocktInfo();
+        public bool Cluster;
         public string configOption;
         public void Connect()
         {
@@ -77,7 +78,7 @@ namespace UAsp.Redis
                     break;
                 sb.Append((char)c);
             }
-            if (sb.ToString().Contains("MOVED"))
+            if (sb.ToString().Contains("MOVED") && Cluster)
             {
                 string[] m = sb.ToString().Split(' ');
                 string[] h = m[2].Split(':');
@@ -159,7 +160,7 @@ namespace UAsp.Redis
                         break;
                     sb.Append((char)c);
                 }
-                if (sb.ToString().Contains("MOVED"))
+                if (sb.ToString().Contains("MOVED")&& Cluster)
                 {
                     string[] m = sb.ToString().Split(' ');
                     string[] h = m[2].Split(':');
