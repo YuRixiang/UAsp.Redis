@@ -19,11 +19,11 @@ namespace UnitTestProject
                 
                 r.SetEX("k", "v",30);
                 r.Del("k");
-                // for (int i = 0; i < 100; i++)
-                // {
-                //   r.Set("foo:test:MM" + i, "Ke" + i);
-                //  r.SendDataCommand(Encoding.UTF8.GetBytes("Ke"+i), "SET", "foo:test:MM"+i);
-                // }
+                for (int i = 0; i < 100; i++)
+                {
+                    r.Set("foo:test:MM" + i, "Ke" + i);
+                    
+                }
 
                 // string str = r.SendCommand("Get", "foo:test");
 
