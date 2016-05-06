@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using UAsp.Redis;
 using System.Text;
@@ -14,14 +15,21 @@ namespace UnitTestProject
             using (Redis r = new Redis())
             {
                 long t = DateTime.Now.Ticks / 10000;
-                r.configOption = "192.168.6.134:6379,192.168.6.131:6380,192.168.6.131:6381,192.168.6.134:6380";
+                r.Cluster = false;
+                //r.Auth = "password";
+                r.configOption = "127.0.0.1:6379";
                 r.Connect();
-                
-                r.SetEX("k", "v",30);
-                r.Del("k");
+                //r.Set("mmm", "sdfsdfsd");
+               Dictionary<string,string> xxx= r.HashGet("codeName");
+                Dictionary<string, string> mmm = new Dictionary<string, string>() { { "k", "test" } , { "z", "test" }, { "x", "test" } };
+                r.Set(mmm);
+                r.HashSet("h", "yu", "kkk");
+               string mx= r.HashGet("dmq:ba_area", "CN");
+                //r.Del("k");
                 for (int i = 0; i < 100; i++)
                 {
-                    r.Set("foo:test:MM" + i, "Ke" + i);
+                  //  r.Del("foo:test:MM" + i);
+                   // r.Set("foo:test:MM" + i, "Ke" + i);
                     
                 }
 
