@@ -168,8 +168,13 @@ namespace UAsp.Redis
 
         public bool Expire(string key, int second)
         {
-            cmd.SendCommand(REDIS_COMMAND.REDIS_COMMAND_EXPIRE, null,key, second.ToString());
+            cmd.SendCommand(REDIS_COMMAND.REDIS_COMMAND_EXPIRE, null, key, second.ToString());
             return true;
+        }
+        public bool Exists(string key)
+        {
+            string result = cmd.SendCommand(REDIS_COMMAND.REDIS_COMMAND_EXISTS, null, key);
+            return int.Parse(result) > 0;
         }
         public void Dispose()
         {
