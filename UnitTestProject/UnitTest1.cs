@@ -4,6 +4,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using UAsp.Redis;
 using System.Text;
 using System.Threading;
+using System.Configuration;
 namespace UnitTestProject
 {
     [TestClass]
@@ -12,34 +13,20 @@ namespace UnitTestProject
         [TestMethod]
         public void TestMethod1()
         {
-            using (Redis r = new Redis())
+            using (RedisClient r = new RedisClient())
             {
-                long t = DateTime.Now.Ticks / 10000;
-                r.Cluster = false;
-                //r.Auth = "password";
-                r.configOption = "127.0.0.1:6379";
-                r.Connect();
-                //r.Set("mmm", "sdfsdfsd");
-               Dictionary<string,string> xxx= r.HashGet("codeName");
-                Dictionary<string, string> mmm = new Dictionary<string, string>() { { "k", "test" } , { "z", "test" }, { "x", "test" } };
-                r.Set(mmm);
-                r.HashSet("h", "yu", "kkk");
-               string mx= r.HashGet("dmq:ba_area", "CN");
-                //r.Del("k");
-                for (int i = 0; i < 100; i++)
-                {
-                  //  r.Del("foo:test:MM" + i);
-                   // r.Set("foo:test:MM" + i, "Ke" + i);
-                    
-                }
-
-                // string str = r.SendCommand("Get", "foo:test");
-
-                // Thread.Sleep(100);
-                long e = DateTime.Now.Ticks / 10000;
-                long m = e - t;
-                //Console.Write(sb);
+                r.Set("K", "v", 100);
+                r.SAdd("myset", "kkk");
+                r.SAdd("myset", "kkp");
+                r.HashSet("kk", "mu", "s");
+               r.HashSet("kk", "sss", "sss");
+                r.HashGet("kk");
+               // r.HashDel("kk", "mu");
+                r.Expire("kk", 100);
+               // r.Save();
             }
+
         }
     }
 }
+
