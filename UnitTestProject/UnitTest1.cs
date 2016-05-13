@@ -20,6 +20,7 @@ namespace UnitTestProject
                 r.SAdd("myset", "kkp");
                 r.HashSet("kk", "mu", "s");
                r.HashSet("kk", "sss", "sss");
+                r.Exists("kk");
                 r.HashGet("kk");
                // r.HashDel("kk", "mu");
                 r.Expire("kk", 100);

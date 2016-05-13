@@ -82,8 +82,14 @@ namespace UAsp.Redis
 
         public const string REDIS_COMMAND_INFO = "INFO";
 
-
+        /// <summary>
+        /// 设置key的过期时间，超过时间后，将会自动删除该key。在Redis的术语中一个key的相关超时是不确定的。
+        /// </summary>
         public const string REDIS_COMMAND_EXPIRE = "EXPIRE";
+        /// <summary>
+        /// 返回key是否存在。
+        /// </summary>
+        public const string REDIS_COMMAND_EXISTS = "EXISTS";
         /// <summary>
         /// 后台保存DB。会立即返回 OK 状态码。 Redis forks, 父进程继续提供服务以供客户端调用，子进程将DB数据保存到磁盘然后退出。如果操作成功，可以通过客户端命令LASTSAVE来检查操作结果。
         /// </summary>

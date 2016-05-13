@@ -12,7 +12,7 @@ namespace UAsp.Redis
 
     public class RedisItem
     {
-        private readonly ILog log = LogManager.GetLogger(typeof(Redis));
+        private readonly ILog log = LogManager.GetLogger(typeof(RedisItem));
         private System.Collections.Concurrent.ConcurrentStack<SocketManager> mClients = new System.Collections.Concurrent.ConcurrentStack<SocketManager>();
         public RedisItem(string host, int port, int count, int timeout = 2000, string password = null)
         {
