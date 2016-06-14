@@ -94,5 +94,36 @@ namespace UAsp.Redis
         /// 后台保存DB。会立即返回 OK 状态码。 Redis forks, 父进程继续提供服务以供客户端调用，子进程将DB数据保存到磁盘然后退出。如果操作成功，可以通过客户端命令LASTSAVE来检查操作结果。
         /// </summary>
         public const string REDIS_COMMAND_SAVE = "BGSAVE";
+        /// <summary>
+        /// 将 key 中储存的数字值增一。
+        //如果 key 不存在，那么 key 的值会先被初始化为 0 ，然后再执行 INCR 操作。
+        //如果值包含错误的类型，或字符串类型的值不能表示为数字，那么返回一个错误。
+        //本操作的值限制在 64 位(bit)有符号数字表示之内。
+        /// </summary>
+
+        public const string REDIS_COMAND_INCR = "INCR";
+
+        /// <summary>
+        /// 标记一个事务块的开始。事务块内的多条命令会按照先后顺序被放进一个队列当中，最后由 EXEC 命令原子性(atomic)地执行。
+        /// </summary>
+        public const string REDIS_COMAND_MULTI = "MULTI";
+        /// <summary>
+        /// 执行所有事务块内的命令。
+        /// </summary>
+        public const string REDIS_COMAND_EXEC = "EXEC";
+        /// <summary>
+        /// 取消事务，放弃执行事务块内的所有命令。
+        /// </summary>
+        public const string REDIS_COMAND_DISCARD = "DISCARD";
+        /// <summary>
+        /// 监视一个(或多个) key ，如果在事务执行之前这个(或这些) key 被其他命令所改动，那么事务将被打断。
+        /// </summary>
+        public const string REDIS_COMAND_WATCH = "WATCH";
+        /// <summary>
+        /// 取消 WATCH 命令对所有 key 的监视。如果在执行 WATCH 命令之后， EXEC 命令或 DISCARD 命令先被执行了的话，那么就不需要再执行 UNWATCH 了。
+        /// </summary>
+        public const string REDIS_COMAND_UNWATCH = "UNWATCH";
+
+
     }
 }

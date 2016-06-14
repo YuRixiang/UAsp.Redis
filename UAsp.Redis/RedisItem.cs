@@ -58,6 +58,12 @@ namespace UAsp.Redis
             sk.SendTimeout = TimeOut;
             try
             {
+                if (ErrorClient.Client.ContainsKey(Host + ":" + Port))
+                {
+                    long time = DateTime.Now.Ticks / 10000;
+                    if ((time - ErrorClient.Client[Host + ":" + Port]) < 3000)
+                        return null;
+                }
                 sk.Connect(Host, Port);
                 if (!sk.Connected)
                 {
@@ -78,6 +84,14 @@ namespace UAsp.Redis
             }
             catch
             {
+                if (!ErrorClient.Client.ContainsKey(Host + ":" + Port))
+                {
+                    ErrorClient.Client.Add(Host + ":" + Port, DateTime.Now.Ticks / 10000);
+                }                    
+                else
+                {
+                    ErrorClient.Client[Host + ":" + Port] = DateTime.Now.Ticks / 10000;
+                }
                 log.Error(Host + ":" + Port + "服务器拒绝连接！");
                 return null;
             }

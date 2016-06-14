@@ -15,16 +15,29 @@ namespace UnitTestProject
         {
             using (RedisClient r = new RedisClient())
             {
-                r.Set("K", "v", 100);
-                r.SAdd("myset", "kkk");
-                r.SAdd("myset", "kkp");
-                r.HashSet("kk", "mu", "s");
-               r.HashSet("kk", "sss", "sss");
-                r.Exists("kk");
-                r.HashGet("kk");
-               // r.HashDel("kk", "mu");
-                r.Expire("kk", 100);
-               // r.Save();
+               // r.Set("KK", "Value");
+                
+                using (Transaction tr = new Transaction(r,"KK"))
+                {
+                    // r.Set("incr", "100");
+                    r.Incr("incr");
+                    int xc = r.Incr("incr");
+                   // r.UnWatch("KK");
+                   bool result=  tr.Commit();
+                }
+                // r.Set("incr", "100");
+                //string c = r.Get("incr");
+
+                // r.SAdd("myset", "kkk");
+                // r.SAdd("myset", "kkp");
+                // r.HashSet("kk", "mu", "s");
+                //r.HashSet("kk", "sss", "sss");
+                // r.Exists("kk");
+                // r.HashGet("kk");
+                //// r.HashDel("kk", "mu");
+                // r.Expire("kk", 100);
+                // r.Save();
+                //string m = r.Info("CPU");
             }
 
         }

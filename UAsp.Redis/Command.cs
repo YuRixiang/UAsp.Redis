@@ -105,8 +105,9 @@ namespace UAsp.Redis
                     string[] h = m[2].Split(':');
                     string host = h[0];
                     int port = int.Parse(h[1]);
-                    Reads.FirstOrDefault(o => o.Host == host & o.Port == port).Clients.TryPop(out read);
-                    Reads.FirstOrDefault(o => o.Host == host & o.Port == port).Clients.Push(read);
+                    RedisItem items = GetItem(Reads, host, port);
+                    items.Clients.TryPop(out read);
+                    items.Clients.Push(read);
                     socket = read.Client;
                     socket.Send(r);
                     msg = ReadLine(read);
@@ -134,21 +135,31 @@ namespace UAsp.Redis
                     {
                         string result = string.Empty;
                         int l = int.Parse(msg.Replace("*", ""));
+                        if (msg.IndexOf("-") == 1)
+                        {
+                            return "0";
+                        }
                         for (int i = 0; i < l; i++)
                         {
                             string val = ReadLine(read);
-                            result = result + ReadLine(read) + "\r\n";
+                            result = result + val + "\r\n";
                         }
+
                         return result;
                     }
                     //操作影响行数 删除
                     if (msg.IndexOf(":") > -1)
                     {
-
                         int result = int.Parse(msg.Replace(":", ""));
 
                         return result.ToString();
                     }
+                    if (msg.IndexOf("+") > -1)
+                    {
+                        return "1";
+                    }
+                    if (msg.IndexOf("-") == 0)
+                    { return "0"; };
                 }
             }
             catch (SocketException e)
@@ -208,8 +219,9 @@ namespace UAsp.Redis
                     string[] h = m[2].Split(':');
                     string host = h[0];
                     int port = int.Parse(h[1]);
-                    Writes.FirstOrDefault(o => o.Host == host & o.Port == port).Clients.TryPop(out write);
-                    Writes.FirstOrDefault(o => o.Host == host & o.Port == port).Clients.Push(write);
+                    RedisItem items = GetItem(Writes, host, port);
+                    items.Clients.TryPop(out write);
+                    items.Clients.Push(write);
                     socket = write.Client;
                     socket.Send(r);
                     if (datas != null && datas.Length > 0)
@@ -293,8 +305,9 @@ namespace UAsp.Redis
                     string[] h = m[2].Split(':');
                     string host = h[0];
                     int port = int.Parse(h[1]);
-                    Writes.FirstOrDefault(o => o.Host == host & o.Port == port).Clients.TryPop(out write);
-                    Writes.FirstOrDefault(o => o.Host == host & o.Port == port).Clients.Push(write);
+                    RedisItem items = GetItem(Writes, host, port);
+                    items.Clients.TryPop(out write);
+                    items.Clients.Push(write);
                     socket = write.Client;
                     socket.Send(ms.ToArray());
                     msg = ReadLine(write);
@@ -310,10 +323,7 @@ namespace UAsp.Redis
             catch (SocketException e)
             {
 
-
-
-
-                throw;
+                throw e;
             }
             return 0;
         }
@@ -329,19 +339,36 @@ namespace UAsp.Redis
         }
         private string ReadLine(SocketManager manager)
         {
+
             StringBuilder sb = new StringBuilder();
             int c;
-
-            while ((c = manager.Bstream.ReadByte()) != -1)
+            try
             {
-                if (c == '\r')
-                    continue;
-                if (c == '\n')
-                    break;
-                sb.Append((char)c);
+                while ((c = manager.Bstream.ReadByte()) != -1)
+                {
+                    if (c == '\r')
+                        continue;
+                    if (c == '\n')
+                        break;
+                    sb.Append((char)c);
+                }
             }
-
+            catch (Exception ex) { log.Error(ex); }
             return sb.ToString();
         }
+
+        private RedisItem GetItem(IList<RedisItem> client, string host, int port)
+        {
+            if (client.Count() == 0)
+                throw new Exception("没有可用的Redis");
+            RedisItem item = client.FirstOrDefault(o => o.Host == host & o.Port == port);
+            if (item == null)
+            {
+                item = new RedisItem(host, port, client[0].Clients.Count, client[0].TimeOut, client[0].Password);
+                client.Add(item);
+            }
+            return item;
+        }
+
     }
 }
