@@ -124,6 +124,38 @@ namespace UAsp.Redis
         /// </summary>
         public const string REDIS_COMAND_UNWATCH = "UNWATCH";
 
+        /// <summary>
+        /// 命令将一个或多个值插入到列表头部。 如果 key 不存在，一个空列表会被创建并执行 LPUSH 操作。 当 key 存在但不是列表类型时，返回一个错误。
+        /// </summary>
+
+        public const string REDIS_COMAND_LPUSH = "LPUSH";
+
+        /// <summary>
+        /// Redis Lpop 命令用于移除并返回列表的第一个元素。
+        /// </summary>
+        public const string REDIS_COMAND_LPOP = "LPOP";
+
+
+        /// <summary>
+        /// Redis Blpop 命令移出并获取列表的第一个元素， 如果列表没有元素会阻塞列表直到等待超时或发现可弹出元素为止。
+        /// </summary>
+        public const string REDIS_COMAND_BLPOP = "BLPOP";
+
+        /// <summary>
+        /// Redis Rpush 命令用于将一个或多个值插入到列表的尾部(最右边)。
+        /// </summary>
+
+        public const string REDIS_COMAND_RPUSH = "RPUSH";
+
+        /// <summary>
+        /// Redis Rpop 命令用于移除并返回列表的最后一个元素。
+        /// </summary>
+        public const string REDIS_COMAND_RPOP = "RPOP";
+
+        /// <summary>
+        /// Redis Brpop 命令移出并获取列表的最后一个元素， 如果列表没有元素会阻塞列表直到等待超时或发现可弹出元素为止。
+        /// </summary>
+        public const string REDIS_COMAND_BRPOP = "BRPOP";
 
     }
 }

@@ -30,47 +30,52 @@ namespace UAsp.Redis
 
         public SocketManager GetWrite()
         {
-            RedisItem item;
-            SocketManager socket;
-            for (int i = 0; i < Writes.Count; i++)
+            lock (this)
             {
-                item = Writes[writeIndex % Writes.Count];
-                if (item.Clients.Count < 1)
-                    continue;
-                if (item.Clients.TryPop(out socket))
+                RedisItem item;
+                SocketManager socket;
+                for (int i = 0; i < Writes.Count; i++)
                 {
-                    if (socket.Client.Connected)
+                    item = Writes[writeIndex % Writes.Count];
+                    if (item.Clients.Count < 1)
+                        continue;
+                    if (item.Clients.TryPop(out socket) && socket.Client.Connected)
                     {
+
                         item.Clients.Push(socket);
                         return socket;
+
                     }
+                    writeIndex++;
                 }
-                writeIndex++;
+                log.Error("没有可写入的的服务器");
+                throw new Exception("没有可用的服务器");
             }
-            log.Error("没有可写入的的服务器");
-            throw new Exception("没有可用的服务器");
         }
         public SocketManager GetRead()
         {
-            RedisItem item;
-            SocketManager socket;
-            for (int i = 0; i < Reads.Count; i++)
+            lock (this)
             {
-                item = Reads[readIndex % Reads.Count];
-                if (item.Clients.Count < 1)
-                    continue;
-                if (item.Clients.TryPop(out socket))
+                RedisItem item;
+                SocketManager socket;
+                for (int i = 0; i < Reads.Count; i++)
                 {
-                    if (socket.Client.Connected)
+                    item = Reads[readIndex % Reads.Count];
+
+                    if (item.Clients.Count < 1)
+                        continue;
+                    if (item.Clients.TryPop(out socket) && socket.Client.Connected)
                     {
+
                         item.Clients.Push(socket);
                         return socket;
+
                     }
+                    readIndex++;
                 }
-                readIndex++;
+                log.Error("没有可读取的的服务器");
+                throw new Exception("没有可用的服务器");
             }
-            log.Error("没有可读取的的服务器");
-            throw new Exception("没有可用的服务器");
         }
         public string SendCommand(string command, SocketManager read, params string[] args)
         {
@@ -139,7 +144,7 @@ namespace UAsp.Redis
                         {
                             return "0";
                         }
-                        for (int i = 0; i < l; i++)
+                        for (int i = 0; i < l * 2; i++)
                         {
                             string val = ReadLine(read);
                             result = result + val + "\r\n";
