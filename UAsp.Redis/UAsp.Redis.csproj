@@ -46,15 +46,20 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Command.cs" />
+    <Compile Include="ErrorClient.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RedisBase.cs" />
     <Compile Include="RedisClient.cs" />
     <Compile Include="RedisClientSection.csd.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>RedisClientSection.csd</DependentUpon>
     </Compile>
+    <Compile Include="RedisExtend.cs" />
     <Compile Include="RedisItem.cs" />
+    <Compile Include="RedisMQClient.cs" />
     <Compile Include="REDIS_COMMAND.cs" />
+    <Compile Include="Transaction.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
