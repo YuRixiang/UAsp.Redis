@@ -102,7 +102,7 @@ namespace UAsp.Redis
             {
 
                 socket.Send(r);
-                string msg = ReadLine(read);
+                string msg = ReadLine(read).Item1;
                 log.Info(msg);
                 if (msg.Contains("-MOVED"))
                 {
@@ -115,7 +115,7 @@ namespace UAsp.Redis
                     items.Clients.Push(read);
                     socket = read.Client;
                     socket.Send(r);
-                    msg = ReadLine(read);
+                    msg = ReadLine(read).Item1;
                     log.Info(msg);
                 }
                 if (!msg.Contains("$-1") && !msg.Contains("-MOVED"))
@@ -128,7 +128,7 @@ namespace UAsp.Redis
                             return msg;
                         while (true)
                         {
-                            msg = msg + ReadLine(read) + "\r\n";
+                            msg = msg + ReadLine(read).Item1 + "\r\n";
                             if (msg.Length > l)
                                 break;
                         }
@@ -146,7 +146,118 @@ namespace UAsp.Redis
                         }
                         for (int i = 0; i < l * 2; i++)
                         {
-                            string val = ReadLine(read);
+                            string val = ReadLine(read).Item1;
+                            result = result + val + "\r\n";
+                        }
+
+                        return result;
+                    }
+                    //操作影响行数 删除
+                    if (msg.IndexOf(":") > -1)
+                    {
+                        int result = int.Parse(msg.Replace(":", ""));
+
+                        return result.ToString();
+                    }
+                    if (msg.IndexOf("+") > -1)
+                    {
+                        return "1";
+                    }
+                    if (msg.IndexOf("-") == 0)
+                    { return "0"; };
+                }
+            }
+            catch (SocketException e)
+            {
+
+                return "0";
+            }
+
+            return "0";
+        }
+        public string SendCommand(string command, SocketManager read, out byte[] byteresult, params string[] args)
+        {
+            List<byte> bytelist = new List<byte>();
+            byteresult = bytelist.ToArray();
+            StringBuilder sb = new StringBuilder();
+            sb.AppendFormat("*{0}\r\n", args != null ? args.Length + 1 : 1);
+
+            var cmd = command.ToString();
+            sb.AppendFormat("${0}\r\n{1}\r\n", cmd.Length, cmd);
+
+            if (args != null)
+                foreach (var arg in args)
+                {
+                    sb.AppendFormat("${0}\r\n{1}\r\n", arg.Length, arg);
+                }
+
+            byte[] r = Encoding.UTF8.GetBytes(sb.ToString());
+            if (read == null)
+            {
+                read = GetRead();
+            }
+            var socket = read.Client;
+            try
+            {
+
+                socket.Send(r);
+                string msg = ReadLine(read).Item1;
+                log.Info(msg);
+                if (msg.Contains("-MOVED"))
+                {
+                    string[] m = msg.ToString().Split(' ');
+                    string[] h = m[2].Split(':');
+                    string host = h[0];
+                    int port = int.Parse(h[1]);
+                    RedisItem items = GetItem(Reads, host, port);
+                    items.Clients.TryPop(out read);
+                    items.Clients.Push(read);
+                    socket = read.Client;
+                    socket.Send(r);
+                    msg = ReadLine(read).Item1;
+                    log.Info(msg);
+                }
+                if (!msg.Contains("$-1") && !msg.Contains("-MOVED"))
+                {
+                    if (msg.IndexOf("$") > -1)
+                    {
+                        int l = int.Parse(msg.Replace("$", ""));
+                        byteresult = new byte[l];
+                        Tuple<string, byte[]> tuple = ReadLine(read);
+                        msg = tuple.Item1 + "\r\n";
+                        bytelist.AddRange(tuple.Item2);
+                        if (msg.Length > l)
+                        {
+
+                            byteresult = bytelist.ToArray();
+                            return msg;
+                        }
+                        while (true)
+                        {
+                            Tuple<string, byte[]> tuples = ReadLine(read);
+                            bytelist.AddRange(tuples.Item2);
+                            msg = msg + tuples.Item1 + "\r\n";
+
+                            if (msg.Length > l)
+
+                                break;
+                        }
+                        byteresult = bytelist.ToArray();
+                        log.Info(msg);
+                        return msg;
+                    }
+                    ///读取对象长度
+                    if (msg.IndexOf("*") > -1)
+                    {
+                        string result = string.Empty;
+                        int l = int.Parse(msg.Replace("*", ""));
+                        if (msg.IndexOf("-") == 1)
+                        {
+                            return "0";
+                        }
+                        for (int i = 0; i < l * 2; i++)
+                        {
+                            string val = ReadLine(read).Item1;
                             result = result + val + "\r\n";
                         }
 
@@ -216,7 +327,7 @@ namespace UAsp.Redis
                     socket.Send(_end_data);
                 }
 
-                string msg = ReadLine(write);
+                string msg = ReadLine(write).Item1;
                 log.Info(msg);
                 if (msg.Contains("-MOVED"))
                 {
@@ -234,7 +345,7 @@ namespace UAsp.Redis
                         socket.Send(datas);
                         socket.Send(_end_data);
                     }
-                    msg = ReadLine(write);
+                    msg = ReadLine(write).Item1;
                     log.Info(msg);
                 }
                 if (msg.IndexOf("+") > -1)
@@ -302,7 +413,7 @@ namespace UAsp.Redis
 
                 socket.Send(ms.ToArray());
 
-                string msg = ReadLine(write);
+                string msg = ReadLine(write).Item1;
 
                 if (msg.Contains("-MOVED"))
                 {
@@ -315,7 +426,7 @@ namespace UAsp.Redis
                     items.Clients.Push(write);
                     socket = write.Client;
                     socket.Send(ms.ToArray());
-                    msg = ReadLine(write);
+                    msg = ReadLine(write).Item1;
                     log.Info(msg);
                 }
                 if (msg.IndexOf("+") > -1)
@@ -342,15 +453,17 @@ namespace UAsp.Redis
 
             return SendCommand(command, read, result, args);
         }
-        private string ReadLine(SocketManager manager)
+        private Tuple<string, byte[]> ReadLine(SocketManager manager)
         {
 
             StringBuilder sb = new StringBuilder();
+            List<int> byteint = new List<int>();
             int c;
             try
             {
                 while ((c = manager.Bstream.ReadByte()) != -1)
                 {
+                    byteint.Add(c);
                     if (c == '\r')
                         continue;
                     if (c == '\n')
@@ -359,8 +472,17 @@ namespace UAsp.Redis
                 }
             }
             catch (Exception ex) { log.Error(ex); }
-            return sb.ToString();
+            byte[] by = new byte[byteint.Count];
+            for (int i = 0; i < byteint.Count; i++)
+            {
+                by[i] = (byte)byteint[i];
+            }
+
+            Tuple<string, byte[]> tuple = new Tuple<string, byte[]>(sb.ToString(), by);
+            return tuple;
         }
+
+
 
         private RedisItem GetItem(IList<RedisItem> client, string host, int port)
         {

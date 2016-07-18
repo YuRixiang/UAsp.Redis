@@ -10,11 +10,8 @@ namespace UAsp.Redis
     public class RedisClient : RedisBase
     {
         private readonly ILog log = LogManager.GetLogger(typeof(RedisClient));
-        private bool cluster;
-        private int db;
-        private string password;
-      
-        public RedisClient() 
+
+        public RedisClient()
         {
             base.Initializer();
 
@@ -26,7 +23,7 @@ namespace UAsp.Redis
         /// <returns></returns>
         public string Get(string key)
         {
-            string m = cmd.SendCommand(REDIS_COMMAND.REDIS_COMMAND_GET,cmd.GetRead(), key);
+            string m = cmd.SendCommand(REDIS_COMMAND.REDIS_COMMAND_GET, cmd.GetRead(), key);
             return m;
         }
         /// <summary>
@@ -76,7 +73,7 @@ namespace UAsp.Redis
         /// </summary>
         /// <param name="key"></param>
         /// <param name="value"></param>
-        /// <param name="express">过去时间秒</param>
+        /// <param name="express">有效时间秒</param>
         /// <returns></returns>
         public int Set(string key, string value, int express)
         {

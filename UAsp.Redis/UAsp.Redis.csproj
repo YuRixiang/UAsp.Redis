@@ -55,6 +55,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>RedisClientSection.csd</DependentUpon>
     </Compile>
+    <Compile Include="RedisExtend.cs" />
     <Compile Include="RedisItem.cs" />
     <Compile Include="RedisMQClient.cs" />
     <Compile Include="REDIS_COMMAND.cs" />
